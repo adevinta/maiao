@@ -1,0 +1,45 @@
+#! /bin/bash
+
+
+GO111MODULE=off go get github.com/axw/gocov/gocov
+GO111MODULE=off go get github.com/AlekSi/gocov-xml
+GO111MODULE=off go get github.com/jstemmer/go-junit-report
+
+
+go test -v ./... -cover -covermode=count -coverprofile=profile.cov | tee /dev/stderr | go-junit-report > junit.xml
+exit_code=$?
+
+gocov convert profile.cov | gocov-xml > coverage.xml
+
+if [[ ${exit_code} -ne 0 ]]; then
+    exit ${exit_code}
+fi
+
+set -euo pipefail
+
+mkdir -p dist
+
+function build(){
+    echo "building for os=${3} arch=${2}"
+    env GOARCH=${2} GOOS=${3} go build -o $1 -ldflags "-X github.com/adevinta/maiao/pkg/version.Version=$(git describe --always --tags --dirty)" ./cmd/maiao
+}
+
+for arch in amd64 arm64; do
+    build dist/git-review-windows-${arch} ${arch} windows
+    build dist/git-review-Darwin-${arch} ${arch} darwin
+    build dist/git-review-Linux-${arch} ${arch} linux
+done
+
+for arch in arm 386; do
+    build dist/git-review-Linux-${arch} ${arch} linux
+    build dist/git-review-windows-${arch} ${arch} windows
+done
+
+for f in dist/git-review-*; do
+    shasum -a1 ${f} | awk '{print $1}' > ${f}.sha1sum
+    shasum -a256 ${f} | awk '{print $1}' > ${f}.sha256sum
+done
+
+
+echo "built objects"
+find dist

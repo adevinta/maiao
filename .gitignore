@@ -1,0 +1,17 @@
+*.pyc
+*.swp
+build
+maiao.egg-info
+.idea
+dist
+version.txt
+.eggs
+.coverage
+htmlcov
+junit.xml
+coverage.xml
+*,cover
+**/*,cover
+*.iml
+junit
+version.txt

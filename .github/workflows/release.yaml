@@ -1,0 +1,23 @@
+name: release
+
+on:
+  push:
+    tags:
+
+jobs:
+
+  call-build:
+    uses: adevinta/maiao/.github/workflows/go.yml@main
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: call-build
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: maiao
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          git-review*
