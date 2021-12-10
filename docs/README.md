@@ -8,4 +8,4 @@ As maiao encourages users to create smaller and nicer commits in their pull requ
 
 # TL;DR
 
-You can find more information in the [getting started](getting-started) page.
+You can find more information in the [getting started](getting-started.md) page.
