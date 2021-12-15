@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/adevinta/maiao/pkg/api"
 	"github.com/adevinta/maiao/pkg/log"
 
 	"github.com/go-git/go-git/v5"
@@ -94,11 +95,75 @@ func (r *testRepository) Worktree() (*git.Worktree, error) {
 	return r.worktree()
 }
 
+type testAPI struct {
+	UpdateFunc              func(context.Context, *api.PullRequest, api.PullRequestOptions) (*api.PullRequest, error)
+	EnsureFunc              func(context.Context, api.PullRequestOptions) (*api.PullRequest, bool, error)
+	LinkedTopicIssuesFunc   func(topic string) string
+	DefaultBranchFunc       func(context.Context) string
+	UpdateCalled            int
+	EnsureCalled            int
+	LinkedTopicIssuesCalled int
+	DefaultBranchCalled     int
+}
+
+// Update defines the interface to create or update a pull request to match options
+func (a *testAPI) Update(ctx context.Context, pr *api.PullRequest, opts api.PullRequestOptions) (*api.PullRequest, error) {
+	a.UpdateCalled++
+	if a.UpdateFunc != nil {
+		return a.UpdateFunc(ctx, pr, opts)
+	}
+	return nil, errors.New("Update not implemented")
+}
+
+// Ensure ensures one and only one pull request exists for the given head
+func (a *testAPI) Ensure(ctx context.Context, opts api.PullRequestOptions) (*api.PullRequest, bool, error) {
+	a.EnsureCalled++
+	if a.EnsureFunc != nil {
+		return a.EnsureFunc(ctx, opts)
+	}
+	return nil, false, errors.New("Ensure not implemented")
+}
+func (a *testAPI) LinkedTopicIssues(topic string) string {
+	a.LinkedTopicIssuesCalled++
+	if a.LinkedTopicIssuesFunc != nil {
+		return a.LinkedTopicIssuesFunc(topic)
+	}
+	return "LinkedTopicIssues not implemented"
+}
+func (a *testAPI) DefaultBranch(ctx context.Context) string {
+	a.DefaultBranchCalled++
+	if a.DefaultBranchFunc != nil {
+		return a.DefaultBranchFunc(ctx)
+	}
+	return "DefaultBranch not implemented"
+}
+
 func TestDefaultOptionsUsesGitDefaults(t *testing.T) {
 	opts := ReviewOptions{}
-	defaultOptions(context.Background(), &testRepository{}, &opts)
+	repo := &testRepository{}
+	defaultBranchOption(context.Background(), repo, nil, &opts)
+	defaultRemoteOption(context.Background(), repo, &opts)
 	assert.Equal(t, "master", opts.Branch)
 	assert.Equal(t, "origin", opts.Remote)
+}
+
+func TestDefaultOptionsUsesGitRemoteDefaults(t *testing.T) {
+	opts := ReviewOptions{}
+	repo := &testRepository{}
+	prAPI := testAPI{
+		DefaultBranchFunc: func(ctx context.Context) string {
+			return "maiao.main"
+		},
+	}
+	defaultBranchOption(context.Background(), repo, &prAPI, &opts)
+	defaultRemoteOption(context.Background(), repo, &opts)
+	assert.Equal(t, "maiao.main", opts.Branch)
+	assert.Equal(t, "origin", opts.Remote)
+
+	assert.Equal(t, 1, prAPI.DefaultBranchCalled)
+	assert.Equal(t, 0, prAPI.EnsureCalled)
+	assert.Equal(t, 0, prAPI.UpdateCalled)
+	assert.Equal(t, 0, prAPI.LinkedTopicIssuesCalled)
 }
 
 func TestDefaultOptionsUsesTrackingRemote(t *testing.T) {
@@ -107,7 +172,7 @@ func TestDefaultOptionsUsesTrackingRemote(t *testing.T) {
 	opts := ReviewOptions{
 		Branch: branch,
 	}
-	defaultOptions(context.Background(), &testRepository{
+	repo := &testRepository{
 		config: func() (*config.Config, error) {
 			return &config.Config{
 				Branches: map[string]*config.Branch{
@@ -115,7 +180,9 @@ func TestDefaultOptionsUsesTrackingRemote(t *testing.T) {
 				},
 			}, nil
 		},
-	}, &opts)
+	}
+	defaultBranchOption(context.Background(), repo, nil, &opts)
+	defaultRemoteOption(context.Background(), repo, &opts)
 	assert.Equal(t, branch, opts.Branch)
 	assert.Equal(t, remoteName, opts.Remote)
 }
@@ -125,7 +192,7 @@ func TestDefaultOptionsUsesGitDefaultRemoteNameWhenNotTracked(t *testing.T) {
 	opts := ReviewOptions{
 		Branch: branch,
 	}
-	defaultOptions(context.Background(), &testRepository{
+	repo := &testRepository{
 		config: func() (*config.Config, error) {
 			return &config.Config{
 				Branches: map[string]*config.Branch{
@@ -133,7 +200,9 @@ func TestDefaultOptionsUsesGitDefaultRemoteNameWhenNotTracked(t *testing.T) {
 				},
 			}, nil
 		},
-	}, &opts)
+	}
+	defaultBranchOption(context.Background(), repo, nil, &opts)
+	defaultRemoteOption(context.Background(), repo, &opts)
 	assert.Equal(t, branch, opts.Branch)
 	assert.Equal(t, "origin", opts.Remote)
 }
@@ -143,13 +212,15 @@ func TestDefaultOptionsUsesGitDefaultRemoteNameWhenTheBranchIsNotFound(t *testin
 	opts := ReviewOptions{
 		Branch: branch,
 	}
-	defaultOptions(context.Background(), &testRepository{
+	repo := &testRepository{
 		config: func() (*config.Config, error) {
 			return &config.Config{
 				Branches: map[string]*config.Branch{},
 			}, nil
 		},
-	}, &opts)
+	}
+	defaultBranchOption(context.Background(), repo, nil, &opts)
+	defaultRemoteOption(context.Background(), repo, &opts)
 	assert.Equal(t, branch, opts.Branch)
 	assert.Equal(t, "origin", opts.Remote)
 }
@@ -159,7 +230,7 @@ func TestDefaultOptionsUsesGitDefaultRemoteNameWhenTheBranchConfigIsNull(t *test
 	opts := ReviewOptions{
 		Branch: branch,
 	}
-	defaultOptions(context.Background(), &testRepository{
+	repo := &testRepository{
 		config: func() (*config.Config, error) {
 			return &config.Config{
 				Branches: map[string]*config.Branch{
@@ -167,7 +238,9 @@ func TestDefaultOptionsUsesGitDefaultRemoteNameWhenTheBranchConfigIsNull(t *test
 				},
 			}, nil
 		},
-	}, &opts)
+	}
+	defaultBranchOption(context.Background(), repo, nil, &opts)
+	defaultRemoteOption(context.Background(), repo, &opts)
 	assert.Equal(t, branch, opts.Branch)
 	assert.Equal(t, "origin", opts.Remote)
 }

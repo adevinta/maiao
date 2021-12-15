@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/adevinta/maiao/pkg/api"
+	lgit "github.com/adevinta/maiao/pkg/git"
+	"github.com/adevinta/maiao/pkg/log"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/sirupsen/logrus"
-	"github.com/adevinta/maiao/pkg/api"
-	lgit "github.com/adevinta/maiao/pkg/git"
-	"github.com/adevinta/maiao/pkg/log"
 )
 
 const (
@@ -40,31 +40,40 @@ type change struct {
 }
 
 func Review(ctx context.Context, repo lgit.Repository, options ReviewOptions) error {
-	// TODO: add missing change id and prompt for install
-	defaultOptions(ctx, repo, &options)
+	defaultRemoteOption(ctx, repo, &options)
 	head, err := repo.Head()
 	if err != nil {
 		log.ForContext(ctx).WithError(err).Error("failed to retrieve git HEAD")
 		return err
 	}
-	remoteRef := plumbing.Revision(fmt.Sprintf("%s/%s", options.Remote, options.Branch))
 
 	ctx = log.WithContextFields(ctx, logrus.Fields{
 		"remote":     options.Remote,
 		"topic":      options.Topic,
 		"branch":     options.Branch,
 		"skipRebase": options.SkipRebase,
-
-		"remoteRef": remoteRef,
-		"headRef":   head.Name().String(),
-		"headSHA":   head.Hash().String(),
+		"headRef":    head.Name().String(),
+		"headSHA":    head.Hash().String(),
 	})
+
 	log.ForContext(ctx).Debugf("finding remote")
 	remote, err := repo.Remote(options.Remote)
 	if err != nil {
 		log.ForContext(ctx).WithError(err).Error("failed to find remote")
 		return err
 	}
+
+	prAPI, err := api.NewPullRequester(ctx, remote)
+	if err != nil {
+		return err
+	}
+	defaultBranchOption(ctx, repo, prAPI, &options)
+
+	remoteRef := plumbing.Revision(fmt.Sprintf("%s/%s", options.Remote, options.Branch))
+	ctx = log.WithContextFields(ctx, logrus.Fields{
+		"remoteRef": remoteRef,
+	})
+
 	log.ForContext(ctx).Debugf("fetching remote")
 	err = remote.Fetch(&git.FetchOptions{
 		RemoteName: options.Remote,
@@ -256,10 +265,15 @@ func sendPrs(ctx context.Context, repo lgit.Repository, options ReviewOptions, b
 	return nil
 }
 
-func defaultOptions(ctx context.Context, repo lgit.Repository, options *ReviewOptions) {
+func defaultBranchOption(ctx context.Context, repo lgit.Repository, prAPI api.PullRequester, options *ReviewOptions) {
 	if options.Branch == "" {
 		cfg, err := repo.Config()
-		options.Branch = "master"
+		if prAPI != nil {
+			options.Branch = prAPI.DefaultBranch(ctx)
+		}
+		if options.Branch == "" {
+			options.Branch = "master"
+		}
 		if err != nil {
 			log.ForContext(ctx).WithError(err).Infof(`unable to load git config, using "%s" default branch`, options.Branch)
 		} else {
@@ -272,6 +286,9 @@ func defaultOptions(ctx context.Context, repo lgit.Repository, options *ReviewOp
 			}
 		}
 	}
+}
+
+func defaultRemoteOption(ctx context.Context, repo lgit.Repository, options *ReviewOptions) {
 	if options.Remote == "" {
 		log.ForContext(ctx).Debugf("finding relevant remote")
 		options.Remote = "origin"
