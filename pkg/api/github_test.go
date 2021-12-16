@@ -314,6 +314,14 @@ func TestGitHubUpsert(t *testing.T) {
 		Tree:    rc.Commit.Tree,
 		Parents: rc.Parents,
 	})
+	if err != nil {
+		if ghError, ok := err.(*github.ErrorResponse); ok {
+			if ghError.Response.StatusCode == http.StatusForbidden {
+				t.Skipf("not enough permissions to run this check: %v", err)
+				return
+			}
+		}
+	}
 	require.NoError(t, err)
 	require.NotNil(t, c)
 	_, _, err = gh.Git.CreateRef(context.Background(), "adevinta", "maiao-tests", &github.Reference{
