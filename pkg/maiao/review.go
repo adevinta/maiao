@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/adevinta/maiao/pkg/api"
+	"github.com/adevinta/maiao/pkg/credentials"
 	lgit "github.com/adevinta/maiao/pkg/git"
+	gh "github.com/adevinta/maiao/pkg/github"
 	"github.com/adevinta/maiao/pkg/log"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
@@ -77,6 +79,7 @@ func Review(ctx context.Context, repo lgit.Repository, options ReviewOptions) er
 	log.ForContext(ctx).Debugf("fetching remote")
 	err = remote.Fetch(&git.FetchOptions{
 		RemoteName: options.Remote,
+		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter},
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
 		log.ForContext(ctx).WithError(err).Error("failed to update git repository")
@@ -225,6 +228,7 @@ func sendPrs(ctx context.Context, repo lgit.Repository, options ReviewOptions, b
 	err = repo.Push(&git.PushOptions{
 		RemoteName: options.Remote,
 		RefSpecs:   refspecs,
+		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter},
 		Force:      true,
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
