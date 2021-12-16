@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"github.com/adevinta/maiao/pkg/log"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/sirupsen/logrus"
-	"github.com/adevinta/maiao/pkg/log"
 )
 
 // PullRequester defines the interface to implement to handle pull requests
@@ -17,6 +17,7 @@ type PullRequester interface {
 	// Ensure ensures one and only one pull request exists for the given head
 	Ensure(context.Context, PullRequestOptions) (*PullRequest, bool, error)
 	LinkedTopicIssues(topic string) string
+	DefaultBranch(context.Context) string
 }
 
 // PullRequestOptions are the options available to create or update a pull request

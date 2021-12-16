@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"strings"
 
+	gh "github.com/adevinta/maiao/pkg/github"
+	"github.com/adevinta/maiao/pkg/log"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/google/go-github/v40/github"
 	"github.com/sirupsen/logrus"
-	gh "github.com/adevinta/maiao/pkg/github"
-	"github.com/adevinta/maiao/pkg/log"
 )
 
 // GitHub implements the PullRequester interface allowing to create pull requests for a given repository
@@ -102,6 +102,15 @@ func (g *GitHub) Update(ctx context.Context, pr *PullRequest, options PullReques
 		ID:  strconv.Itoa(*p.Number),
 		URL: *p.URL,
 	}, err
+}
+
+// DefaultBranch returns the default branch of the remote repository
+func (g *GitHub) DefaultBranch(ctx context.Context) string {
+	repo, _, err := g.Repositories.Get(ctx, g.Owner, g.Repository)
+	if err != nil {
+		return ""
+	}
+	return repo.GetDefaultBranch()
 }
 
 // LinkedTopicIssues returns the search URL for linked issues
