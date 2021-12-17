@@ -6,7 +6,13 @@
 
 A sane review workflow with GitHub PRs
 
-As maiao encourages users to create smaller and nicer commits in their pull requests, it has been given the name of a tiny island:
+Maiao provides the `git review` command, which will publish a PR for every new commit in your local main
+branch.
+
+## Name inspiration
+
+As maiao encourages users to create smaller and nicer commits in their pull requests, it has been given the name of a
+tiny island:
 
 ![](img/inspired.jpg)
 
