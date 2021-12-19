@@ -9,4 +9,5 @@ import (
 var DefaultCredentialGetter credentials.CredentialGetter = credentials.ChainCredentialGetter([]credentials.CredentialGetter{
 	&credentials.EnvToken{PasswordKey: "GITHUB_TOKEN"},
 	&credentials.Netrc{},
+	&credentials.GitCredentials{GitPath: "git"},
 })
