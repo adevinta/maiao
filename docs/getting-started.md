@@ -41,14 +41,14 @@ is. You then:
 
 Now you see that change in your pull request, and your colleague is happy.
 
-A second colleague points out that the function you defined in the first commit is inefficient. Then you:
+A second colleague points out that the function you defined in the **first commit** is inefficient. Then you:
 
 1. Fix the function
 2. Add the changes with `git add`
 3. Run `git log`
-4. Copy the hash of the corresponding commit. This corresponds to the hexadecimal value
-   in `commit cf5fd9a0baf2fd899ed0ef45629dc1f1c1b7af87`, for example.
-5. Commit those changes as a fixup to that specific commit with `git commit --fixup HEAD`.
+4. Copy the hash of the corresponding **first commit**. (For example, this corresponds to the hexadecimal value
+    `cf5fd9a0baf2fd899ed0ef45629dc1f1c1b7af87`).
+5. Commit those changes as a fixup to that specific commit with `git commit --fixup <commit-hash>`.
 6. Run `git review`.
 
 Your change is now published to the corresponding PR. You and your colleagues are satisfied.
