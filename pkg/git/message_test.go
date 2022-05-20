@@ -16,13 +16,15 @@ And the body
 
 with multiple lines
 
+and a link http://maiao.foo
+
 Header : bla
 
 `
 
 	m := Parse(commitMessage)
 	assert.Equal(t, "This is the commit Title", m.Title)
-	assert.Equal(t, "And the body\n\n\nwith multiple lines", m.Body)
+	assert.Equal(t, "And the body\n\n\nwith multiple lines\n\nand a link http://maiao.foo", m.Body)
 	assert.Equal(t, map[string]string{"Header": "bla"}, m.Headers)
 }
 

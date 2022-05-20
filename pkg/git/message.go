@@ -19,7 +19,7 @@ type Message struct {
 	Headers map[string]string
 }
 
-var headerRe = regexp.MustCompile("^([^:]+):([^:]+)$")
+var headerRe = regexp.MustCompile("^([^:]+):([^:/]+)$")
 
 // Parse parses a commit message string into a structured object
 func Parse(message string) *Message {
