@@ -19,7 +19,9 @@ type Message struct {
 	Headers map[string]string
 }
 
-var headerRe = regexp.MustCompile("^([^:]+):([^:]+)$")
+var (
+	headerRe = regexp.MustCompile(`^([a-zA-Z0-9_-]+)\s*:\s+(.+)$`)
+)
 
 // Parse parses a commit message string into a structured object
 func Parse(message string) *Message {
@@ -33,14 +35,15 @@ func Parse(message string) *Message {
 	sep := ""
 	for scanner.Scan() {
 		line := scanner.Text()
-		submatch := headerRe.FindSubmatch([]byte(line))
-		if len(submatch) == 3 {
-			name := strings.Trim(string(submatch[1]), " ")
-			value := strings.Trim(string(submatch[2]), " ")
-			l.WithField("line", line).WithField("header", name).WithField("value", value).Trace("header found in commit message")
-			m.Headers[name] = value
-		} else {
+		parts := headerRe.FindStringSubmatch(line)
+		fmt.Println(parts)
+		switch len(parts) {
+		case 0, 1, 2:
+			l.WithField("line", line).Trace("line does not contain header")
 			m.Body += sep + line
+		case 3:
+			l.WithField("line", line).WithField("header", parts[0]).WithField("value", parts[1]).Trace("header found in commit message")
+			m.Headers[parts[1]] = parts[2]
 		}
 		sep = "\n"
 	}
