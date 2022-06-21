@@ -3,9 +3,9 @@ package git
 import (
 	"testing"
 
+	"github.com/adevinta/maiao/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/adevinta/maiao/pkg/log"
 )
 
 func TestCommit(t *testing.T) {
@@ -24,6 +24,20 @@ Header : bla
 	assert.Equal(t, "This is the commit Title", m.Title)
 	assert.Equal(t, "And the body\n\n\nwith multiple lines", m.Body)
 	assert.Equal(t, map[string]string{"Header": "bla"}, m.Headers)
+}
+
+func TestCommitHeaders(t *testing.T) {
+	commitMessage := `This is the commit Title
+
+https://github.com
+Header : bla
+Change-Id: Iabcd
+`
+
+	m := Parse(commitMessage)
+	assert.Equal(t, "This is the commit Title", m.Title)
+	assert.Equal(t, "https://github.com", m.Body)
+	assert.Equal(t, map[string]string{"Header": "bla", "Change-Id": "Iabcd"}, m.Headers)
 }
 
 func TestCommitSupportWindowsStyle(t *testing.T) {
