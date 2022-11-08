@@ -14,6 +14,7 @@ var DefaultCredentialGetter credentials.CredentialGetter = credentials.ChainCred
 
 var GitHubEnterpriseCredentialGetter credentials.CredentialGetter = credentials.ChainCredentialGetter([]credentials.CredentialGetter{
 	&credentials.EnvToken{PasswordKey: "GITHUB_ENTERPRISE_TOKEN"},
+	&credentials.EnvToken{PasswordKey: "GITHUB_TOKEN"},
 	&credentials.Netrc{},
 	&credentials.GitCredentials{GitPath: "git"},
 })
