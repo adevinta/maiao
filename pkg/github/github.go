@@ -52,6 +52,11 @@ func NewClient(domain string) (*github.Client, error) {
 
 func getGithubToken(domain string) (string, error) {
 	creds, err := DefaultCredentialGetter.CredentialForHost(domain)
+
+	if domain != "github.com" {
+		creds, err = GitHubEnterpriseCredentialGetter.CredentialForHost(domain)
+	}
+
 	if err != nil {
 		return "", err
 	}
