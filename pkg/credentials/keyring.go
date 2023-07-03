@@ -38,7 +38,7 @@ func (k Keyring) CredentialForHost(h string) (*Credentials, error) {
 			return nil, err
 		}
 		prompt = promptui.Prompt{
-			Label:  fmt.Sprintf("password for %s", h),
+			Label:  fmt.Sprintf("password for %s (usually your Personal Access Token)", h),
 			Mask:   '*',
 			Stdin:  os.Stdin,
 			Stdout: os.Stdout,
