@@ -36,7 +36,6 @@ func Parse(message string) *Message {
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := headerRe.FindStringSubmatch(line)
-		fmt.Println(parts)
 		switch len(parts) {
 		case 0, 1, 2:
 			l.WithField("line", line).Trace("line does not contain header")
