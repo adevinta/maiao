@@ -1,6 +1,7 @@
 package gh
 
 import (
+	"github.com/99designs/keyring"
 	"github.com/adevinta/maiao/pkg/credentials"
 )
 
@@ -10,4 +11,10 @@ var DefaultCredentialGetter credentials.CredentialGetter = credentials.ChainCred
 	&credentials.EnvToken{PasswordKey: "GITHUB_TOKEN"},
 	&credentials.Netrc{},
 	&credentials.GitCredentials{GitPath: "git"},
+	credentials.MustNewKeyring(keyring.Config{
+		ServiceName:              "maiao",
+		PassPrefix:               "maiao/",
+		KeychainTrustApplication: true,
+		KeychainSynchronizable:   true,
+	}),
 })
