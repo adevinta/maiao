@@ -24,6 +24,7 @@ func NewClient(domain string) (*github.Client, error) {
 	if domain == "github.com" {
 		domain = "api.github.com"
 	}
+	// TODO: move this to handle unauthorized calls.
 	token, err := getGithubToken(domain)
 	if err != nil {
 		logger.Errorf("unable to find token for %s: %s", domain, err.Error())

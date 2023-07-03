@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/99designs/keyring"
 	"github.com/adevinta/maiao/pkg/git"
 	"github.com/adevinta/maiao/pkg/log"
 	"github.com/adevinta/maiao/pkg/version"
@@ -37,8 +38,10 @@ func NewCommand() *cobra.Command {
 			case "3":
 				log.Logger.SetLevel(logrus.InfoLevel)
 			case "4":
+				keyring.Debug = true
 				log.Logger.SetLevel(logrus.DebugLevel)
 			case "5":
+				keyring.Debug = true
 				log.Logger.SetLevel(logrus.TraceLevel)
 			default:
 				return fmt.Errorf("unexpected log level %s expecting 0-5", cmd.Flag("verbose").Value.String())
