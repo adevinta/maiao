@@ -91,6 +91,17 @@ machine github.company.example.com
   password <your token>
 ```
 
+### Experimental system keychain
+
+You may now use all the default keyrings supported by [`99-designs/keyring`](https://pkg.go.dev/github.com/99designs/keyring@v1.2.2#section-readme).
+
+To enable it, ensure you export the `MAIAO_EXPERIMENTAL_CREDENTIALS=true` environment variable before running `git review`.
+Maiao will then use your system keyring like [macOS keychain](https://support.apple.com/en-au/guide/keychain-access/welcome/mac) or [pass](https://www.passwordstore.org/)
+to store GitHub API keys.
+
+We will be happy to receive your feedback about this feature in [maiao's issues](https://github.com/adevinta/maiao/issues) 
+
+
 Your environment is then ready to run maiao.
 
 There will be some other configuration required for each repository you need to run maiao on. Don't worry, maiao will
