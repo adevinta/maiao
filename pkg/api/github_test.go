@@ -18,7 +18,7 @@ import (
 	gh "github.com/adevinta/maiao/pkg/github"
 	"github.com/adevinta/maiao/pkg/log"
 	"github.com/go-git/go-git/v5/plumbing/transport"
-	"github.com/google/go-github/v40/github"
+	"github.com/google/go-github/v55/github"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
