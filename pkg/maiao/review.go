@@ -77,10 +77,8 @@ func Review(ctx context.Context, repo lgit.Repository, options ReviewOptions) er
 	})
 
 	log.ForContext(ctx).Debugf("fetching remote")
-	err = remote.Fetch(&git.FetchOptions{
-		RemoteName: options.Remote,
-		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter},
-	})
+
+	err = lgit.Fetch(ctx, repo, remote)
 	if err != nil && err != git.NoErrAlreadyUpToDate {
 		log.ForContext(ctx).WithError(err).Error("failed to update git repository")
 		return err

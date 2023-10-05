@@ -35,6 +35,22 @@ type Repository interface {
 	Worktree() (*git.Worktree, error)
 }
 
+func Fetch(ctx context.Context, repo Repository, remote *git.Remote) error {
+	wt, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+	c := exec.Command("git", "-C", wt.Filesystem.Root(), "fetch", remote.Config().Name)
+	out := bytes.Buffer{}
+	c.Stdout = &out
+	c.Stderr = os.Stderr
+	err = c.Run()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func MergeBase(ctx context.Context, repo Repository, base, head plumbing.Revision) (plumbing.Hash, error) {
 	wt, err := repo.Worktree()
 	if err != nil {
