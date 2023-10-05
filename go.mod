@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/99designs/keyring v1.2.2
 	github.com/go-git/go-git/v5 v5.9.0
-	github.com/google/go-github/v40 v40.0.0
+	github.com/google/go-github/v55 v55.0.0
 	github.com/google/uuid v1.3.0
 	github.com/guseggert/pkggodev-client v0.0.0-20211029144512-2df8afe3ebe4
 	github.com/jdxcode/netrc v0.0.0-20210204082910-926c7f70242a
