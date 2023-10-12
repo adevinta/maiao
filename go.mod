@@ -1,6 +1,6 @@
 module github.com/adevinta/maiao
 
-go 1.17
+go 1.20
 
 require (
 	github.com/99designs/keyring v1.2.2
