@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"os"
+
+	"github.com/adevinta/maiao/pkg/committemplate"
 	"github.com/adevinta/maiao/pkg/gerrit"
 	lgit "github.com/adevinta/maiao/pkg/git"
+	"github.com/spf13/cobra"
 )
 
 func install(cmd *cobra.Command, args []string) error {
@@ -14,6 +17,12 @@ func install(cmd *cobra.Command, args []string) error {
 	err = gerrit.Install(gitDir)
 	if err != nil {
 		return err
+	}
+	if os.Getenv("MAIAO_EXPERIMENTAL_COMMIT_TEMPLATE") == "true" {
+		err = committemplate.Install(gitDir)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
