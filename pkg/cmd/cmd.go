@@ -107,6 +107,12 @@ func NewCommand() *cobra.Command {
 			RunE:   rebaseEditor,
 			Hidden: true,
 		},
+		&cobra.Command{
+			Use:    "prepare-commit-message",
+			Short:  "Initialises a commit message with Pull Request templates",
+			RunE:   prepare_commit_message,
+			Hidden: true,
+		},
 	)
 	rootCmd.AddCommand()
 	return rootCmd

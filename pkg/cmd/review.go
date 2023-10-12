@@ -3,17 +3,20 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/spf13/cobra"
+	"github.com/adevinta/maiao/pkg/committemplate"
 	"github.com/adevinta/maiao/pkg/gerrit"
 	lgit "github.com/adevinta/maiao/pkg/git"
 	"github.com/adevinta/maiao/pkg/maiao"
 	"github.com/adevinta/maiao/pkg/prompt"
+	"github.com/go-git/go-git/v5"
+	"github.com/spf13/cobra"
 )
 
 const (
 	hookMissing          = "commit message hook is missing, do you want to install it automatically?"
+	prHookMissing        = "PR template injection hook is missing, do you want to install it automatically?"
 	noAutoInstallHookFmt = "You are missing change ids in your commits. \nPlease install the commit hook by running\n`curl -o .git/hooks/commit-msg %s && chmod +x .git/hooks/commit-msg`"
 )
 
@@ -40,6 +43,16 @@ func review(cmd *cobra.Command, args []string) error {
 		} else {
 			fmt.Println(fmt.Sprintf(noAutoInstallHookFmt, gerrit.HookURL()))
 			return nil
+		}
+	}
+	if os.Getenv("MAIAO_EXPERIMENTAL_COMMIT_TEMPLATE") == "true" {
+		if !committemplate.Installed(gitDir) {
+			if prompt.YesNo(prHookMissing) {
+				err = committemplate.Install(gitDir)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return maiao.Review(context.Background(), repo, maiao.ReviewOptions{
