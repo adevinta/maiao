@@ -108,6 +108,9 @@ func Prepare(ctx context.Context, repo lgit.Repository, path string) error {
 		if instructions[i] == '\n' {
 			continue
 		}
+		if len(cfg.Core.CommentChar) == 0 {
+			cfg.Core.CommentChar = "#"
+		}
 		if instructions[i] == cfg.Core.CommentChar[0] {
 			break
 		}
