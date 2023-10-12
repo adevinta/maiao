@@ -3,25 +3,23 @@ package gerrit
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/pkg/errors"
 
-	"github.com/sirupsen/logrus"
+	"github.com/adevinta/maiao/pkg/git"
 	"github.com/adevinta/maiao/pkg/log"
 	"github.com/adevinta/maiao/pkg/system"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	gitCommitMsgHookPath = "hooks/commit-msg"
-	gitHubURL            = "https://raw.githubusercontent.com"
-	repo                 = "GerritCodeReview/gerrit"
-	commitHash           = "43d985a2a15a7d59d42e19ffd60d41c0de6c3e59"
-	commitMsgHookPath    = "gerrit-server/src/main/resources/com/google/gerrit/server/tools/root/hooks/commit-msg"
+	gitHubURL         = "https://raw.githubusercontent.com"
+	repo              = "GerritCodeReview/gerrit"
+	commitHash        = "43d985a2a15a7d59d42e19ffd60d41c0de6c3e59"
+	commitMsgHookPath = "gerrit-server/src/main/resources/com/google/gerrit/server/tools/root/hooks/commit-msg"
 )
 
 var commitMsgHookURL = fmt.Sprintf("%s/%s/%s/%s", gitHubURL, repo, commitHash, commitMsgHookPath)
@@ -41,7 +39,7 @@ func HookURL() string {
 
 // Installed returned wether the gerrit hook message is installed
 func (g *Gerrit) Installed() bool {
-	path := hookPath(g.gitDir)
+	path := git.HookPath(g.gitDir, git.CommitMsgHook)
 	_, err := system.DefaultFileSystem.Stat(path)
 	log.Logger.WithFields(logrus.Fields{
 		"gitDir":               g.gitDir,
@@ -53,7 +51,7 @@ func (g *Gerrit) Installed() bool {
 
 // Install installs the gerrit commit message hook in a repository
 func (g *Gerrit) Install() error {
-	path := hookPath(g.gitDir)
+	path := git.HookPath(g.gitDir, git.CommitMsgHook)
 
 	l := log.Logger.WithFields(logrus.Fields{
 		"gitDir":           g.gitDir,
@@ -111,21 +109,4 @@ func Installed(gitDir string) bool {
 func Install(gitDir string) error {
 	g := &Gerrit{gitDir}
 	return g.Install()
-}
-
-func hookPath(gitDir string) string {
-	commonDirPath := filepath.Join(gitDir, "commondir")
-	_, err := system.DefaultFileSystem.Stat(commonDirPath)
-	if err == nil {
-		fd, err := system.DefaultFileSystem.Open(commonDirPath)
-		if err == nil {
-			defer fd.Close()
-			bytes, err := ioutil.ReadAll(fd)
-			if err == nil {
-				fmt.Println(gitDir, strings.TrimSpace(string(bytes)), filepath.Join(gitDir, strings.TrimSpace(string(bytes))))
-				gitDir = filepath.Join(gitDir, strings.TrimSpace(string(bytes)))
-			}
-		}
-	}
-	return filepath.Join(gitDir, gitCommitMsgHookPath)
 }
