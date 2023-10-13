@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/google/go-github/v40/github"
+	"github.com/google/go-github/v55/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
