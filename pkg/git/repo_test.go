@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/adevinta/maiao/pkg/log"
+	"github.com/adevinta/maiao/pkg/system"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/adevinta/maiao/pkg/log"
-	"github.com/adevinta/maiao/pkg/system"
 )
 
 func TestFindGitDir(t *testing.T) {
@@ -41,6 +41,31 @@ func TestFindGitDir(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "", dir)
 
+}
+
+func TestFindGitDirWithWorkDir(t *testing.T) {
+	repo, err := os.MkdirTemp("", "maiao-worktree-test-git-dir-repo")
+	require.NoError(t, err)
+	worktree, err := os.MkdirTemp("", "maiao-worktree-test-git-dir-worktree")
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		os.RemoveAll(repo)
+		os.RemoveAll(worktree)
+	})
+	cmd(t, "git", "-C", repo, "init")
+	cmd(t, "git", "-C", repo, "commit", "--allow-empty", "-m", "initial commit")
+	// Use show toplevel as tempfiles on mac may be in /var/folders/... while mounted volumes are in /private/var/folders/...
+	// Internally, when creating worktrees, git uses the toplevel to point to the worktree dir
+	// Hint it to do the same
+	repoGitDir, err := FindGitDir(cmdOutput(t, "git", "-C", repo, "rev-parse", "--show-toplevel"))
+	assert.NoError(t, err)
+	cmd(t, "git", "-C", repo, "worktree", "add", worktree)
+	worktreeGitDir, err := FindGitDir(worktree)
+	assert.NoError(t, err)
+
+	if !strings.HasPrefix(worktreeGitDir, filepath.Join(repoGitDir, "worktrees")) {
+		assert.Failf(t, "Unexpected prefix", "worktree git dir '%s' should be included in the repo git dir '%s'", worktreeGitDir, filepath.Join(repoGitDir, ".git", "worktrees"))
+	}
 }
 
 func cmd(t testing.TB, cmd string, args ...string) {

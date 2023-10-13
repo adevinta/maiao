@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 
 	"github.com/adevinta/maiao/pkg/system"
 	"github.com/go-git/go-git/v5"
@@ -99,6 +102,39 @@ func RebaseCommits(ctx context.Context, repo Repository, base, onto plumbing.Has
 	return nil
 }
 
+func resolveGitDir(gitDir string) (string, error) {
+	for {
+		stat, err := system.DefaultFileSystem.Stat(gitDir)
+		if err != nil {
+			return "", err
+		}
+		if stat.IsDir() {
+			return gitDir, nil
+		}
+		// gitdir may be a file containing the path to the git directory
+		// with git specific formatting.
+		// In case gitdir is a file, parse it to resolve the actual gitDir
+		data, err := afero.ReadFile(system.DefaultFileSystem, gitDir)
+		if err != nil {
+			return "", errors.Wrap(err, fmt.Sprintf("failed to open gitdir %s", gitDir))
+		}
+		target := string(data)
+		target = strings.Trim(target, " \n\r")
+		target = strings.TrimPrefix(target, "gitdir: ")
+		if target == gitDir {
+			return "", errors.New("gitdir file points to itself")
+		}
+		if target == "" {
+			return "", errors.New("invalid gitdir format. gitdir points nowhere")
+		}
+		if filepath.IsAbs(target) {
+			gitDir = target
+		} else {
+			gitDir = filepath.Join(gitDir, target)
+		}
+	}
+}
+
 func FindGitDir(path string) (string, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
@@ -106,8 +142,7 @@ func FindGitDir(path string) (string, error) {
 	}
 	path = abs
 	for {
-		gitDir := filepath.Join(path, ".git")
-		stat, err := system.DefaultFileSystem.Stat(gitDir)
+		gitDir, err := resolveGitDir(filepath.Join(path, ".git"))
 		if os.IsNotExist(err) {
 			path = filepath.Dir(path)
 			if path == "/" || path == "" {
@@ -115,10 +150,10 @@ func FindGitDir(path string) (string, error) {
 			}
 			continue
 		}
-		if stat.IsDir() {
-			return gitDir, nil
+		if err != nil {
+			return "", err
 		}
-		return "", errors.New("gitdir is not a directory")
+		return gitDir, nil
 
 	}
 }
