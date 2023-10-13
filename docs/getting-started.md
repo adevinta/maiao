@@ -55,6 +55,15 @@ Your change is now published to the corresponding PR. You and your colleagues ar
 
 ## Installation
 
+### Homebrew users
+
+To install maiao with homebrew, you need to tap the repo before installing it:
+
+```bash
+brew tap adevinta/maiao https://github.com/adevinta/maiao.git
+brew install maiao
+```
+
 ### Unix users
 
 The simplest way to install maiao is to download the binary from github. To do so, visit
