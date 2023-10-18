@@ -1,6 +1,7 @@
 package maiao
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"strings"
 
@@ -23,11 +24,15 @@ func details(body []string, summary string) []string {
 }
 
 func topicDetails(prAPI api.PullRequester, topic string) []string {
+	sha := sha1.New()
+	sha.Write([]byte("topic: "))
+	sha.Write([]byte(topic))
+	topicSha := fmt.Sprintf("%x", sha.Sum(nil))
 	return details(
 		[]string{
 			"This change is part of a broader topic that can be in multiple repositories.",
 			"<br/>",
-			`Topic: <a href="` + prAPI.LinkedTopicIssues(topic) + `">` + topic + `</a>`,
+			fmt.Sprintf(`Topic: <a href="%s" searchSha="%v">%s</a>`, prAPI.LinkedTopicIssues(topicSha), topicSha, topic),
 		},
 		"Broader related changes",
 	)

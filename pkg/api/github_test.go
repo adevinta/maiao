@@ -353,6 +353,17 @@ func TestGitHubUpsert(t *testing.T) {
 
 }
 
+func TestLinkedTopicIssues(t *testing.T) {
+	g := GitHub{
+		Host: "github.com",
+	}
+	assert.Equal(
+		t,
+		"https://github.com/search?q=is%3Apr+is%3Aopen+%22topic-sha%22&type=issues",
+		g.LinkedTopicIssues("topic-sha"),
+	)
+}
+
 // get all logs when running tests
 func init() {
 	log.Logger.SetLevel(logrus.DebugLevel)
