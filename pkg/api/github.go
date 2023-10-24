@@ -114,8 +114,12 @@ func (g *GitHub) DefaultBranch(ctx context.Context) string {
 }
 
 // LinkedTopicIssues returns the search URL for linked issues
-func (g *GitHub) LinkedTopicIssues(topic string) string {
-	return `https://` + g.Host + `/search?q=type%3Apr+%22Topic%3A+` + url.QueryEscape(topic) + `%22&type=Issues`
+func (g *GitHub) LinkedTopicIssues(topicSearchString string) string {
+	values := url.Values{}
+	values.Add("q", fmt.Sprintf(`is:pr is:open "%s"`, topicSearchString))
+	values.Add("type", "issues")
+	values.Encode()
+	return `https://` + g.Host + `/search?` + values.Encode()
 }
 
 // NewGitHubUpserter instanciates an upserter that uses the github API to create and update pull requests

@@ -16,7 +16,7 @@ type PullRequester interface {
 	Update(context.Context, *PullRequest, PullRequestOptions) (*PullRequest, error)
 	// Ensure ensures one and only one pull request exists for the given head
 	Ensure(context.Context, PullRequestOptions) (*PullRequest, bool, error)
-	LinkedTopicIssues(topic string) string
+	LinkedTopicIssues(topicSearchString string) string
 	DefaultBranch(context.Context) string
 }
 
