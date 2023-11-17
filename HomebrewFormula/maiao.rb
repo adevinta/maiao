@@ -2,8 +2,8 @@ class Maiao < Formula
   desc "Seamless GitHub PR management from the command-line"
   homepage "https://github.com/adevinta/maiao"
   url "https://github.com/adevinta/maiao.git",
-    tag:      "1.1.0",
-    revision: "a105d869324d20a9c94081cb0f03149a743e184b"
+    tag:      "1.2.0",
+    revision: "382803517c67aedeb8e729b877be138b3561830c"
   license "MIT"
   conflicts_with "git-review"
   head "https://github.com/adevinta/maiao.git",
