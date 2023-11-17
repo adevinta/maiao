@@ -3,7 +3,7 @@ class Maiao < Formula
   homepage "https://github.com/adevinta/maiao"
   url "https://github.com/adevinta/maiao.git",
     tag:      "1.2.0",
-    revision: "bf4f552a17c69bd741b5f1fdfc7c725828c4b1b0"
+    revision: "382803517c67aedeb8e729b877be138b3561830c"
   license "MIT"
   conflicts_with "git-review"
   head "https://github.com/adevinta/maiao.git",
