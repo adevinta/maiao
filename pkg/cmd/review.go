@@ -43,9 +43,11 @@ func review(cmd *cobra.Command, args []string) error {
 		}
 	}
 	return maiao.Review(context.Background(), repo, maiao.ReviewOptions{
-		Remote:     cmd.Flag("remote").Value.String(),
-		SkipRebase: cmd.Flag("no-rebase").Value.String() != "false",
-		Topic:      cmd.Flag("topic").Value.String(),
-		Branch:     branch,
+		Remote:         cmd.Flag("remote").Value.String(),
+		SkipRebase:     cmd.Flag("no-rebase").Value.String() != "false",
+		Topic:          cmd.Flag("topic").Value.String(),
+		Branch:         branch,
+		WorkInProgress: cmd.Flag("work-in-progress").Value.String() != "false",
+		Ready:          cmd.Flag("ready").Value.String() != "false",
 	})
 }

@@ -23,11 +23,13 @@ const (
 )
 
 type ReviewOptions struct {
-	RepoPath   string
-	Remote     string
-	Branch     string
-	SkipRebase bool
-	Topic      string
+	RepoPath       string
+	Remote         string
+	Branch         string
+	SkipRebase     bool
+	Topic          string
+	WorkInProgress bool
+	Ready          bool
 }
 
 type change struct {

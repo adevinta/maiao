@@ -42,12 +42,16 @@ func (g *GitHub) Ensure(ctx context.Context, options PullRequestOptions) (*PullR
 	}
 	switch len(prs) {
 	case 0:
-		pr, _, err := g.PullRequests.Create(context.Background(), g.Owner, g.Repository, &github.NewPullRequest{
+		newPROptions := &github.NewPullRequest{
 			Title: github.String(options.Title),
 			Body:  github.String(options.Body),
 			Base:  github.String(options.Base),
 			Head:  github.String(options.Head),
-		})
+		}
+		if options.WIP {
+			newPROptions.Draft = github.Bool(true)
+		}
+		pr, _, err := g.PullRequests.Create(context.Background(), g.Owner, g.Repository, newPROptions)
 		if err != nil {
 			log.ForContext(ctx).WithError(err).Error("failed to create new pull request")
 			return nil, false, err
@@ -83,7 +87,7 @@ func (g *GitHub) Update(ctx context.Context, pr *PullRequest, options PullReques
 		return nil, err
 	}
 	ctx = log.WithContextFields(ctx, logrus.Fields{"prID": id})
-	p, _, err := g.PullRequests.Edit(ctx, g.Owner, g.Repository, id, &github.PullRequest{
+	prUpdateOptions := &github.PullRequest{
 		Title: github.String(options.Title),
 		Body:  github.String(options.Body),
 		Base: &github.PullRequestBranch{
@@ -92,7 +96,11 @@ func (g *GitHub) Update(ctx context.Context, pr *PullRequest, options PullReques
 		Head: &github.PullRequestBranch{
 			Ref: github.String(options.Head),
 		},
-	})
+	}
+	if options.Ready {
+		prUpdateOptions.Draft = github.Bool(false)
+	}
+	p, _, err := g.PullRequests.Edit(ctx, g.Owner, g.Repository, id, prUpdateOptions)
 	if err != nil {
 		log.ForContext(ctx).WithError(err).Error("failed to edit pull request")
 		return nil, err
