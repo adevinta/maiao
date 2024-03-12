@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"strings"
 	"testing"
 
 	"github.com/adevinta/maiao/pkg/api"
 	"github.com/adevinta/maiao/pkg/log"
+	"github.com/adevinta/maiao/pkg/system"
+	"github.com/spf13/afero"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
@@ -321,6 +326,75 @@ func TestRemoveMergedChangeIDs(t *testing.T) {
 			},
 		),
 	)
+}
+
+func gitCommand(t *testing.T, path string, args ...string) string {
+	t.Helper()
+	cmd := exec.Command("git", args...)
+	cmd.Dir = path
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err)
+	return strings.TrimSpace(string(out))
+}
+
+func TestExtractChanges(t *testing.T) {
+	d, err := os.MkdirTemp("", t.Name())
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		os.RemoveAll(d)
+	})
+	fs := afero.NewBasePathFs(afero.NewOsFs(), d)
+
+	gitCommand(t, d, "init")
+	gitCommand(t, d, "config", "user.email", "john.doe@example.com")
+	gitCommand(t, d, "config", "user.name", "John Doe")
+	gitCommand(t, d, "commit", "--allow-empty", "-m", "Initial commit")
+	initialCommit := gitCommand(t, d, "rev-parse", "HEAD")
+	system.EnsureTestFileContent(t, fs, "code.txt", `
+	func removeMergedChangeIDs(changes []*change, knownChangeIDs map[string]struct{}) []*change {
+		filtered := []*change{}
+		for _, change := range changes {
+			if _, ok := knownChangeIDs[change.changeID]; !ok {
+				filtered = append(filtered, change)
+			}
+		}
+		return filtered
+	}`)
+	gitCommand(t, d, "add", "code.txt")
+	gitCommand(t, d, "commit", "-m", "Code number one")
+	system.EnsureTestFileContent(t, fs, "code.txt", `
+	func removeMergedChangeIDs(changes []*change, knownChangeIDs map[string]struct{}) []*change {
+		filtered := []*change{}
+		for _, change := range changes {
+		}
+		return filtered
+	}`)
+	gitCommand(t, d, "add", "code.txt")
+	gitCommand(t, d, "commit", "-m", "Code number two")
+	system.EnsureTestFileContent(t, fs, "code.txt", `
+	func removeMergedChangeIDs(changes []*change, knownChangeIDs map[string]struct{}) []*change {
+		filtered := []*change{}
+		for _, change := range changes {
+			fmt.Println(change)
+		}
+		return filtered
+	}`)
+	gitCommand(t, d, "add", "code.txt")
+	gitCommand(t, d, "commit", "-m", "Code number three", "-m", "ChangeId: I1234")
+	fmt.Println(d)
+
+	repo, err := git.PlainOpen(d)
+	require.NoError(t, err)
+	head, err := repo.Head()
+	require.NoError(t, err)
+	b, err := repo.ResolveRevision(plumbing.Revision(initialCommit))
+	require.NoError(t, err)
+	changes, err := extractChanges(context.Background(), repo, *b, head.Hash())
+	require.NoError(t, err)
+	require.Len(t, changes, 3)
+	assert.Equal(t, "Code number one", strings.TrimSpace(changes[0].commits[0].Message))
+	assert.Equal(t, "Code number two", strings.TrimSpace(changes[1].commits[0].Message))
+	assert.Equal(t, "Code number three\n\nChangeId: I1234", strings.TrimSpace(changes[2].commits[0].Message))
 }
 
 func TestNeedReview(t *testing.T) {

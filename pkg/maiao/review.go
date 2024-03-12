@@ -395,11 +395,11 @@ func extractChanges(ctx context.Context, repo lgit.Repository, base, head plumbi
 			}
 			changeID, ok := message.GetChangeID()
 			if !ok {
-				changes = append(changes, &change{
+				changes = append([]*change{{
 					commits: changeCommits,
 					head:    changeCommits[len(changeCommits)-1],
 					message: message,
-				})
+				}}, changes...)
 
 			} else {
 				changes = append([]*change{{
