@@ -49,6 +49,7 @@ func (g *GitHub) Ensure(ctx context.Context, options PullRequestOptions) (*PullR
 			Head:  github.String(options.Head),
 		}
 		if options.WIP {
+			log.ForContext(ctx).Info("adding draft marker")
 			newPROptions.Draft = github.Bool(true)
 		}
 		pr, _, err := g.PullRequests.Create(context.Background(), g.Owner, g.Repository, newPROptions)
@@ -98,6 +99,7 @@ func (g *GitHub) Update(ctx context.Context, pr *PullRequest, options PullReques
 		},
 	}
 	if options.Ready {
+		log.ForContext(ctx).Info("removing draft status")
 		prUpdateOptions.Draft = github.Bool(false)
 	}
 	p, _, err := g.PullRequests.Edit(ctx, g.Owner, g.Repository, id, prUpdateOptions)
