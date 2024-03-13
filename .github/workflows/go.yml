@@ -3,7 +3,9 @@ name: Go
 on:
   workflow_call:
   push:
-    branches: [ main ]
+    branches:
+    - "main"
+    - "gh-readonly-queue/**/*"
   pull_request:
     branches: "*"
 
