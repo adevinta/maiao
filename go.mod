@@ -4,11 +4,6 @@ go 1.22
 
 require (
 	github.com/99designs/keyring v1.2.2
-	// Unfortunately, there is no way, with the REST API to mark a PR as ready.
-	// see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
-	// Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
-	// the official GitHub CLI client.
-	github.com/cli/cli/v2 v2.45.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/google/go-github/v55 v55.0.0
 	github.com/google/uuid v1.4.0
@@ -25,6 +20,15 @@ require (
 )
 
 require (
+    // Unfortunately, there is no way, with the REST API to mark a PR as ready.
+    // see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
+    // Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
+    // the official GitHub CLI client.
+	github.com/cli/go-gh/v2 v2.6.0
+	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278
+)
+
+require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
@@ -36,7 +40,6 @@ require (
 	github.com/antchfx/xpath v1.2.0 // indirect
 	github.com/aymanbagabas/go-osc52 v1.0.3 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
-	github.com/cli/go-gh/v2 v2.6.0 // indirect
 	github.com/cli/safeexec v1.0.1 // indirect
 	github.com/cli/shurcooL-graphql v0.0.4 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
@@ -69,7 +72,6 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
-	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278 // indirect
 	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -78,7 +80,6 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

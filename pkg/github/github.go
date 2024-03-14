@@ -7,15 +7,21 @@ import (
 	"net/url"
 
 	"github.com/adevinta/maiao/pkg/log"
+	"github.com/cli/go-gh/v2/pkg/api"
 	"github.com/google/go-github/v55/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
-func NewHTTPClientForDomain(ctx context.Context, domain string) (*http.Client, error) {
+func GitHubAPIDomain(domain string) string {
 	if domain == "github.com" {
-		domain = "api.github.com"
+		return "api.github.com"
 	}
+	return domain
+}
+
+func NewHTTPClientForDomain(ctx context.Context, domain string) (*http.Client, error) {
+	domain = GitHubAPIDomain(domain)
 	// TODO: move this to handle unauthorized calls.
 	token, err := getGithubToken(domain)
 	if err != nil {
@@ -29,6 +35,19 @@ func NewHTTPClientForDomain(ctx context.Context, domain string) (*http.Client, e
 	return tc, nil
 }
 
+func NewGraphQLClient(httpClient *http.Client, domain string) (*api.GraphQLClient, error) {
+	opts := api.ClientOptions{
+		AuthToken: "overridden by Transport",
+		Host:      GitHubAPIDomain(domain),
+		Transport: httpClient.Transport,
+	}
+	client, err := api.NewGraphQLClient(opts)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
 // NewClient instanciates a new github client depending on the domain name
 //
 // When requesting a client for a different host than github.com,
@@ -39,11 +58,11 @@ func NewHTTPClientForDomain(ctx context.Context, domain string) (*http.Client, e
 func NewClient(httpClient *http.Client, domain string) (*github.Client, error) {
 	c := github.NewClient(httpClient)
 	switch domain {
-	case "api.github.com", "github.com":
+	case "github.com", "api.github.com":
 	default:
 		GitHubURL := url.URL{
 			Scheme: "https",
-			Host:   domain,
+			Host:   GitHubAPIDomain(domain),
 			Path:   "/api/v3/",
 		}
 		GitHubUploadURL := GitHubURL

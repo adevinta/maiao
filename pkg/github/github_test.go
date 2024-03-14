@@ -1,12 +1,14 @@
 package gh
 
 import (
+	"context"
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/adevinta/maiao/pkg/credentials"
 	"github.com/adevinta/maiao/pkg/system"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func setCredentialStore(c credentials.CredentialGetter) {
@@ -17,6 +19,18 @@ type TestCredentialGetter struct {
 	Credentials *credentials.Credentials
 	Error       error
 	Check       func()
+}
+
+func TestNewGraphQLClient(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "test")
+	ctx := context.Background()
+	httpClient, err := NewHTTPClientForDomain(ctx, "github.com")
+	require.NoError(t, err)
+	graphQLClient, err := NewGraphQLClient(httpClient, "github.com")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, graphQLClient)
+
 }
 
 func (c *TestCredentialGetter) CredentialForHost(string) (*credentials.Credentials, error) {
