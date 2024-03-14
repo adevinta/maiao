@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
 	gh "github.com/adevinta/maiao/pkg/github"
 	"github.com/adevinta/maiao/pkg/log"
+	"github.com/cli/cli/v2/api"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/google/go-github/v55/github"
 	"github.com/sirupsen/logrus"
@@ -17,10 +19,29 @@ import (
 
 // GitHub implements the PullRequester interface allowing to create pull requests for a given repository
 type GitHub struct {
+	httpClient *http.Client
 	*github.Client
 	Host       string
 	Owner      string
 	Repository string
+}
+
+// RepoName implements the ghrepo.Interface interface required to call the github graphql API from https://github.com/cli/cli
+// See https://github.com/cli/cli/blob/dc804d928714120a3f4b53f78847aec7ba282c63/internal/ghrepo/repo.go#L14
+func (g *GitHub) RepoName() string {
+	return g.Repository
+}
+
+// RepoHost implements the ghrepo.Interface interface required to call the github graphql API from https://github.com/cli/cli
+// See https://github.com/cli/cli/blob/dc804d928714120a3f4b53f78847aec7ba282c63/internal/ghrepo/repo.go#L14
+func (g *GitHub) RepoOwner() string {
+	return g.Owner
+}
+
+// RepoHost implements the ghrepo.Interface interface required to call the github graphql API from https://github.com/cli/cli
+// See https://github.com/cli/cli/blob/dc804d928714120a3f4b53f78847aec7ba282c63/internal/ghrepo/repo.go#L14
+func (g *GitHub) RepoHost() string {
+	return g.Host
 }
 
 // Ensure ensures a PR is opened for the head branch
@@ -98,16 +119,23 @@ func (g *GitHub) Update(ctx context.Context, pr *PullRequest, options PullReques
 			Ref: github.String(options.Head),
 		},
 	}
-	if options.Ready {
-		log.ForContext(ctx).Info("removing draft status")
-		prUpdateOptions.Draft = github.Bool(false)
-	}
 	p, _, err := g.PullRequests.Edit(ctx, g.Owner, g.Repository, id, prUpdateOptions)
 	if err != nil {
 		log.ForContext(ctx).WithError(err).Error("failed to edit pull request")
 		return nil, err
 	}
 	log.ForContext(ctx).Info("edit pull request")
+	if options.Ready {
+		log.ForContext(ctx).Info("marking pull request as ready")
+		// Unfortunately, there is no way, with the REST API to mark a PR as ready.
+		// see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
+		// Instead, use the graphQL client and in particular, use the github cli implementation
+		err = api.PullRequestReady(api.NewClientFromHTTP(g.httpClient), g, &api.PullRequest{ID: pr.ID})
+		if err != nil {
+			log.ForContext(ctx).WithError(err).Error("failed to mark pull request as ready")
+			return nil, err
+		}
+	}
 	return &PullRequest{
 		ID:  strconv.Itoa(*p.Number),
 		URL: *p.URL,
@@ -144,7 +172,8 @@ func NewGitHubUpserter(ctx context.Context, endpoint *transport.Endpoint) (*GitH
 		log.ForContext(ctx).WithField("repository", endpoint.Path).Error("invalid repository, expecting <org>/<repo>")
 		return nil, fmt.Errorf("invalid repository, expecting <org>/<repo>")
 	}
-	client, err := gh.NewClient(endpoint.Host)
+	httpClient, err := gh.NewHTTPClientForDomain(ctx, endpoint.Host)
+	client, err := gh.NewClient(httpClient, endpoint.Host)
 	if err != nil {
 		log.ForContext(ctx).WithError(err).Errorf("failed to create a new github client: %s", err.Error())
 		return nil, err
@@ -159,6 +188,7 @@ func NewGitHubUpserter(ctx context.Context, endpoint *transport.Endpoint) (*GitH
 		Owner:      repo.GetOwner().GetLogin(),
 		Repository: repo.GetName(),
 		Client:     client,
+		httpClient: httpClient,
 	}
 	log.ForContext(ctx).Trace("initialized github client")
 	return gh, nil

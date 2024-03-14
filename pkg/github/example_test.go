@@ -6,7 +6,11 @@ import (
 )
 
 func ExampleNewGithubClient() {
-	client, err := NewClient("github.com")
+	httpClient, err := NewHTTPClientForDomain(context.Background(), "github.com")
+	if err != nil {
+		Logger.Errorf("failed to create http client: %s", err.Error())
+	}
+	client, err := NewClient(httpClient, "github.com")
 	if err != nil {
 		Logger.Errorf("failed to create github client: %s", err.Error())
 	}
