@@ -1,10 +1,12 @@
 #! /bin/bash
 
+set -e
 
-GO111MODULE=off go get github.com/axw/gocov/gocov
-GO111MODULE=off go get github.com/AlekSi/gocov-xml
-GO111MODULE=off go get github.com/jstemmer/go-junit-report
+go install github.com/axw/gocov/gocov@latest
+go install github.com/AlekSi/gocov-xml@latest
+go install github.com/jstemmer/go-junit-report@latest
 
+set +e
 
 go test -v ./... -cover -covermode=count -coverprofile=profile.cov | tee /dev/stderr | go-junit-report > junit.xml
 exit_code=$?
