@@ -97,5 +97,7 @@ func prOptions(repo lgit.Repository, prAPI api.PullRequester, options ReviewOpti
 		Head:  change.branch,
 		Title: title,
 		Body:  strings.Join(append([]string{change.message.Body}, additions...), "\n"),
+		Ready: options.Ready,
+		WIP:   options.WorkInProgress,
 	}
 }

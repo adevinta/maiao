@@ -26,6 +26,8 @@ type PullRequestOptions struct {
 	Head  string
 	Title string
 	Body  string
+	WIP   bool
+	Ready bool
 }
 
 // PullRequest defines the object
