@@ -11,7 +11,7 @@ require (
 	github.com/jdxcode/netrc v1.0.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
@@ -20,10 +20,10 @@ require (
 )
 
 require (
-    // Unfortunately, there is no way, with the REST API to mark a PR as ready.
-    // see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
-    // Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
-    // the official GitHub CLI client.
+	// Unfortunately, there is no way, with the REST API to mark a PR as ready.
+	// see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
+	// Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
+	// the official GitHub CLI client.
 	github.com/cli/go-gh/v2 v2.6.0
 	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278
 )
