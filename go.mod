@@ -15,15 +15,15 @@ require (
 	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/mod v0.13.0
+	golang.org/x/mod v0.16.0
 	golang.org/x/oauth2 v0.18.0
 )
 
 require (
-    // Unfortunately, there is no way, with the REST API to mark a PR as ready.
-    // see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
-    // Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
-    // the official GitHub CLI client.
+	// Unfortunately, there is no way, with the REST API to mark a PR as ready.
+	// see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
+	// Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
+	// the official GitHub CLI client.
 	github.com/cli/go-gh/v2 v2.6.0
 	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278
 )
