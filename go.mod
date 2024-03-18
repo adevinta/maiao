@@ -6,7 +6,7 @@ require (
 	github.com/99designs/keyring v1.2.2
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/google/go-github/v55 v55.0.0
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.6.0
 	github.com/guseggert/pkggodev-client v0.0.0-20211029144512-2df8afe3ebe4
 	github.com/jdxcode/netrc v1.0.0
 	github.com/manifoldco/promptui v0.9.0
@@ -20,10 +20,10 @@ require (
 )
 
 require (
-    // Unfortunately, there is no way, with the REST API to mark a PR as ready.
-    // see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
-    // Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
-    // the official GitHub CLI client.
+	// Unfortunately, there is no way, with the REST API to mark a PR as ready.
+	// see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
+	// Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
+	// the official GitHub CLI client.
 	github.com/cli/go-gh/v2 v2.6.0
 	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278
 )
