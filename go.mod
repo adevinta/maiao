@@ -10,7 +10,6 @@ require (
 	github.com/google/go-github/v55 v55.0.0
 	github.com/google/uuid v1.6.0
 	github.com/guseggert/pkggodev-client v0.0.0-20211029144512-2df8afe3ebe4
-	github.com/h2non/filetype v1.1.3
 	github.com/jdxcode/netrc v1.0.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pkg/errors v0.9.1
@@ -19,7 +18,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/mod v0.17.0
-	golang.org/x/oauth2 v0.18.0
+	golang.org/x/oauth2 v0.29.0
 )
 
 require (
@@ -86,7 +85,6 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/term v0.31.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
