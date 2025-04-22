@@ -15,6 +15,7 @@ import (
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,10 +79,19 @@ func Review(ctx context.Context, repo lgit.Repository, options ReviewOptions) er
 		"remoteRef": remoteRef,
 	})
 
+	if len(remote.Config().URLs) != 1 {
+		return errors.New("multiple URLs not supported")
+	}
+
+	endpoint, err := transport.NewEndpoint(remote.Config().URLs[0])
+	if err != nil {
+		return err
+	}
+
 	log.ForContext(ctx).Debugf("fetching remote")
 	err = remote.Fetch(&git.FetchOptions{
 		RemoteName: options.Remote,
-		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter},
+		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter, Endpoint: endpoint},
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
 		log.ForContext(ctx).WithError(err).Error("failed to update git repository")
@@ -226,11 +236,20 @@ func sendPrs(ctx context.Context, repo lgit.Repository, options ReviewOptions, b
 		refspecs = append(refspecs, config.RefSpec(change.head.Hash.String()+":refs/heads/"+change.branch))
 	}
 
+	if len(remote.Config().URLs) != 1 {
+		return errors.New("multiple URLs not supported")
+	}
+
+	endpoint, err := transport.NewEndpoint(remote.Config().URLs[0])
+	if err != nil {
+		return err
+	}
+
 	log.ForContext(ctx).WithField("refspec", refspecs).Debugf("pushing PR changes")
 	err = repo.Push(&git.PushOptions{
 		RemoteName: options.Remote,
 		RefSpecs:   refspecs,
-		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter},
+		Auth:       &credentials.GitAuth{Credentials: gh.DefaultCredentialGetter, Endpoint: endpoint},
 		Force:      true,
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
