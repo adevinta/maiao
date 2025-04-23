@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ExampleNewGithubClient() {
+func ExampleNewClient() {
 	httpClient, err := NewHTTPClientForDomain(context.Background(), "github.com")
 	if err != nil {
 		Logger.Errorf("failed to create http client: %s", err.Error())
