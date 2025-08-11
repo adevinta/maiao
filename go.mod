@@ -27,7 +27,7 @@ require (
 	// see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#update-a-pull-request
 	// Instead, we must use the graphQL client and in particular, for which there is a dedicated function in
 	// the official GitHub CLI client.
-	github.com/cli/go-gh/v2 v2.12.1
+	github.com/cli/go-gh/v2 v2.12.2
 	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278
 )
 
