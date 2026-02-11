@@ -1,6 +1,6 @@
 # Maiao
 
-![Main branch build](https://img.shields.io/github/workflow/status/adevinta/maiao/Go/main)
+![Main branch build](https://github.com/github/adevinta/maiao/workflows/go.yml/badge.svg)
 ![License](https://img.shields.io/github/license/adevinta/maiao)
 ![GitHub all releases downloads](https://img.shields.io/github/downloads/adevinta/maiao/total)
 
@@ -11,6 +11,7 @@ Maiao brings the power of **stacked pull requests** to GitHub, enabling you to b
 ## 🎯 What is Maiao?
 
 Maiao provides the `git review` command that:
+
 - **Creates one PR per commit** in your branch
 - **Stacks PRs automatically** with proper parent-child dependencies
 - **Manages fixups elegantly** using `git commit --fixup`
@@ -30,6 +31,7 @@ git review
 ```
 
 **Result**: Three GitHub PRs created:
+
 - PR #1: `Add user authentication` → `main`
 - PR #2: `Add authorization middleware` → PR #1
 - PR #3: `Add admin endpoints` → PR #2
