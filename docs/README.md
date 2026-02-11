@@ -1,6 +1,6 @@
 # Maiao
 
-![Main branch build](https://github.com/github/adevinta/maiao/workflows/go.yml/badge.svg)
+![](https://github.com/adevinta/maiao/actions/workflows/go.yml/badge.svg)
 ![License](https://img.shields.io/github/license/adevinta/maiao)
 ![GitHub all releases downloads](https://img.shields.io/github/downloads/adevinta/maiao/total)
 
