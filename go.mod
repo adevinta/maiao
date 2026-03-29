@@ -40,7 +40,7 @@ require (
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/antchfx/htmlquery v1.2.4 // indirect
 	github.com/antchfx/xmlquery v1.3.7 // indirect
-	github.com/antchfx/xpath v1.2.0 // indirect
+	github.com/antchfx/xpath v1.3.6 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/cli/safeexec v1.0.1 // indirect
