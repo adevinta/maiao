@@ -96,8 +96,8 @@ func NewCommand() *cobra.Command {
 		},
 		&cobra.Command{
 			Use:   "version",
-			Short: "Installs commit message hook to the repository",
-			Long:  `Installs commit message hook to the repository`,
+			Short: "Show version and exits",
+			Long:  `Show version and exits`,
 			Run: func(cmd *cobra.Command, args []string) {
 				fmt.Println(version.Version)
 			},
